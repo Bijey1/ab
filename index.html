@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Save Me ❤️</title>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: sans-serif;
+        overflow: hidden;
+        background: #87ceeb;
+      }
+
+      /* INTRO GIF */
+      #intro-gif {
+        position: fixed;
+        inset: 0;
+        background: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+      }
+
+      #intro-gif img {
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+      }
+
+      /* GAME */
+      #game {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+      }
+
+      /* PLAYER */
+      #player {
+        position: absolute;
+        top: 30px;
+        right: 70px;
+        width: 50px;
+        height: 50px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+      }
+
+      #speech {
+        position: absolute;
+        top: 10px;
+        right: 70px;
+        background: white;
+        color: black;
+        padding: 6px 10px;
+        border-radius: 10px;
+        font-size: 20px;
+        max-width: 160px;
+      }
+
+      /* SQUARE OBJECTS */
+      .enemy {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+      }
+
+      .lock {
+        width: 80px;
+        height: 80px;
+        background: brown;
+      }
+
+      .door {
+        width: 200px;
+        height: 200px;
+      }
+
+      /* OVERLAY */
+      #overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+        z-index: 500;
+      }
+
+      button {
+        margin-top: 15px;
+        padding: 10px 20px;
+        font-size: 18px;
+        border-radius: 10px;
+        border: none;
+        background: #ff6347;
+        color: white;
+      }
+
+      #boss-hp {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 70%;
+        height: 16px;
+        border: 2px solid black;
+        background: #444;
+        display: none; /* only show during boss */
+      }
+
+      #boss-hp-fill {
+        height: 100%;
+        width: 100%;
+        background: red;
+        transition: width 0.2s;
+      }
+      @keyframes shake {
+        0% {
+          transform: translateX(0);
+        }
+        20% {
+          transform: translateX(-10px);
+        }
+        40% {
+          transform: translateX(10px);
+        }
+        60% {
+          transform: translateX(-10px);
+        }
+        80% {
+          transform: translateX(10px);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+
+      .shake {
+        animation: shake 0.3s ease;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- INTRO CUTSCENE -->
+    <div id="intro-gif">
+      <img src="boss-kidnap.gif" alt="Boss kidnaps me" />
+    </div>
+
+    <!-- GAME -->
+    <div id="game">
+      <div id="boss-hp">
+        <div id="boss-hp-fill"></div>
+      </div>
+      <div id="player">
+        <img src="assets/bigSad.png" />
+        <div id="speech">Help me!</div>
+      </div>
+    </div>
+
+    <!-- MESSAGE -->
+    <div id="overlay">
+      <div id="overlay-text"></div>
+      <button id="next">Next</button>
+    </div>
+
+    <script>
+      const game = document.getElementById("game");
+      const overlay = document.getElementById("overlay");
+      const overlayText = document.getElementById("overlay-text");
+      const nextBtn = document.getElementById("next");
+      const speech = document.getElementById("speech");
+
+      let level = 1;
+      let objects = [];
+
+      //////////////// INTRO //////////////////
+      /*
+      setTimeout(() => {
+        document.getElementById("intro-gif").style.display = "none";
+        startLevel();
+      }, 3000); // match GIF length
+      */
+      document.getElementById("intro-gif").style.display = "none";
+      startLevel();
+
+      //////////////// GAME CORE //////////////////
+      function clearGame() {
+        objects.forEach((o) => o.remove());
+        objects = [];
+      }
+
+      function showOverlay(text) {
+        overlayText.innerText = text;
+        overlay.style.display = "flex";
+      }
+
+      nextBtn.onclick = () => {
+        overlay.style.display = "none";
+        level++;
+        startLevel();
+      };
+
+      //////////////// LEVELS //////////////////
+      let again1 = true;
+
+      function startLevel() {
+        clearGame();
+
+        if (level === 1) {
+          level1(7);
+        } else if (level === 2) level2();
+        else if (level === 3) level3();
+        else if (level === 4) level1(18);
+        else if (level === 5) level5();
+        else endGame();
+      }
+
+      /* LEVEL 1 – Tap Enemies */
+      function level1(enemyCnt) {
+        speech.innerText = "Tap them before they reach the bottom!";
+
+        // Add tap effect listeners
+        function spawnTapEffect(x, y) {
+          const effect = document.createElement("img");
+          effect.src = "assets/sword_cut.gif";
+          effect.style.position = "fixed";
+          effect.style.left = x - 25 + "px";
+          effect.style.top = y - 25 + "px";
+          effect.style.width = "50px";
+          effect.style.height = "50px";
+          effect.style.pointerEvents = "none";
+          effect.style.zIndex = 999;
+
+          document.body.appendChild(effect);
+
+          setTimeout(() => effect.remove(), 250);
+        }
+
+        function clickListener(e) {
+          spawnTapEffect(e.clientX, e.clientY);
+        }
+
+        function touchListener(e) {
+          const touch = e.touches[0];
+          spawnTapEffect(touch.clientX, touch.clientY);
+        }
+
+        document.addEventListener("click", clickListener);
+        document.addEventListener("touchstart", touchListener);
+
+        // When level ends, remove listeners
+        function cleanupTapEffect() {
+          document.removeEventListener("click", clickListener);
+          document.removeEventListener("touchstart", touchListener);
+        }
+
+        // Call cleanup whenever level ends
+        const originalShowOverlay = showOverlay;
+        showOverlay = (text) => {
+          cleanupTapEffect();
+          originalShowOverlay(text);
+        };
+        setTimeout(() => {
+          speech.innerText = "";
+          speech.style.background = "none";
+        }, 3000); //Delay
+
+        let gameOver = false;
+        const loseLine = 85; // vh
+        const enemyCount = enemyCnt;
+
+        // Create horizontal lanes
+        const laneWidth = 80 / enemyCount; // vw (safe area)
+
+        for (let i = 0; i < enemyCount; i++) {
+          const e = document.createElement("div");
+          e.className = "enemy";
+
+          const img = document.createElement("img");
+          img.src = "assets/goons.gif";
+          img.style.width = "100%";
+          img.style.height = "100%";
+          img.style.pointerEvents = "none"; // important!
+
+          e.appendChild(img);
+
+          // Spawn near top, not on player
+          let y = 20 + Math.random() * 10; // 20–30vh
+
+          // Lane-based X position
+          let x = i * laneWidth + laneWidth / 2;
+
+          e.style.top = y + "vh";
+          e.style.left = x + "vw";
+
+          game.appendChild(e);
+          objects.push(e);
+
+          // Slow downward movement
+          const speed = 0.1 + Math.random() * 0.08;
+
+          const moveInterval = setInterval(() => {
+            if (gameOver) {
+              clearInterval(moveInterval);
+              return;
+            }
+
+            y += speed;
+            e.style.top = y + "vh";
+
+            if (y >= loseLine) {
+              gameOver = true;
+              clearInterval(moveInterval);
+              showOverlay("Oh no! They got past you 💔");
+            }
+          }, 20);
+
+          // Tap to destroy
+          e.onclick = () => {
+            clearInterval(moveInterval);
+            e.remove();
+            objects = objects.filter((o) => o !== e);
+
+            if (!objects.length && !gameOver) {
+              showOverlay("Nice! Keep going!");
+            }
+          };
+        }
+      }
+
+      /* LEVEL 2 – Tap Barrier */
+      function level2() {
+        speech.innerText = "Break it!";
+        let taps = 0;
+        const wall = document.createElement("div");
+        wall.className = "enemy door";
+        wall.style.top = "35vh";
+        wall.style.left = "25vw";
+        // INSERT IMAGE
+        const img = document.createElement("img");
+        img.src = "assets/door.png"; // or .png
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.pointerEvents = "none"; // VERY IMPORTANT
+        wall.appendChild(img);
+
+        wall.onclick = () => {
+          wall.style.transform = "translateX(-20px)";
+          setTimeout(() => (wall.style.transform = "none"), 100);
+          taps++;
+          if (taps == 3) {
+            img.src = "assets/2door.png"; // or .png
+            img.style.width = "100%";
+            img.style.height = "100%";
+            img.style.pointerEvents = "none"; // VERY IMPORTANT
+            wall.appendChild(img);
+          } else if (taps == 6) {
+            img.src = "assets/finalDoor.png"; // or .png
+            img.style.width = "100%";
+            img.style.height = "100%";
+            img.style.pointerEvents = "none"; // VERY IMPORTANT
+            wall.appendChild(img);
+          }
+          if (taps >= 8) {
+            wall.remove();
+            showOverlay("You broke it!");
+          }
+        };
+        game.appendChild(wall);
+        objects.push(wall);
+      }
+
+      /* LEVEL 3 – Find the Correct Key */
+      /* LEVEL 3 – Find the Correct Key */
+      /* LEVEL 3 – Find the Correct Key */
+      function level3() {
+        speech.innerText = "Try the keys!";
+
+        const keyCount = 15;
+        const correct = Math.floor(Math.random() * keyCount);
+
+        // TIMER BAR SETTINGS
+        let timeLeft = 15; // seconds
+        const timerBar = document.createElement("div");
+        timerBar.id = "level3-timer-bar";
+        timerBar.style.position = "absolute";
+        timerBar.style.top = "5vh";
+        timerBar.style.left = "5vw";
+        timerBar.style.width = "80vw";
+        timerBar.style.height = "20px";
+        timerBar.style.backgroundColor = "#555";
+        timerBar.style.border = "2px solid #fff";
+        timerBar.style.borderRadius = "10px";
+        timerBar.style.overflow = "hidden";
+        timerBar.style.zIndex = 1000;
+
+        const timerFill = document.createElement("div");
+        timerFill.style.height = "100%";
+        timerFill.style.width = "100%";
+        timerFill.style.backgroundColor = "#4caf50"; // green bar
+        timerFill.style.transition = "width 0.2s linear";
+
+        timerBar.appendChild(timerFill);
+        game.appendChild(timerBar);
+
+        const timerInterval = setInterval(() => {
+          timeLeft -= 0.1; // 0.1 sec step for smooth shrinking
+          if (timeLeft < 0) timeLeft = 0;
+
+          const percent = (timeLeft / 20) * 100;
+          timerFill.style.width = percent + "%";
+
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            timerBar.remove();
+            showOverlay("Time's up! ⏰");
+            objects.forEach((o) => o.remove());
+            objects = [];
+          }
+        }, 100);
+
+        // Door position
+        const lockX = 25;
+        const lockY = 35;
+        const doorSafeRadius = 40;
+
+        // Player/top safe zone
+        const topSafeY = 25; // vh
+
+        // Prevent overlap
+        const usedPositions = [];
+        const keySafeRadius = 8;
+
+        const lock = document.createElement("div");
+        lock.className = "enemy door";
+        lock.style.top = lockY + "vh";
+        lock.style.left = lockX + "vw";
+
+        const img = document.createElement("img");
+        img.src = "assets/keyDoor.png";
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.pointerEvents = "none";
+        lock.appendChild(img);
+
+        game.appendChild(lock);
+        objects.push(lock);
+
+        for (let i = 0; i < keyCount; i++) {
+          const key = document.createElement("div");
+          key.className = "enemy";
+
+          const img2 = document.createElement("img");
+          img2.src = "assets/key.png";
+          img2.style.pointerEvents = "none";
+          key.appendChild(img2);
+
+          let x, y;
+          let valid = false;
+
+          while (!valid) {
+            x = Math.random() * 80;
+            y = Math.random() * 80;
+            valid = true;
+
+            if (y < topSafeY) valid = false; // avoid player
+            if (
+              Math.abs(x - lockX) < doorSafeRadius &&
+              Math.abs(y - lockY) < doorSafeRadius
+            )
+              valid = false;
+
+            for (const pos of usedPositions) {
+              if (
+                Math.abs(x - pos.x) < keySafeRadius &&
+                Math.abs(y - pos.y) < keySafeRadius
+              ) {
+                valid = false;
+                break;
+              }
+            }
+          }
+
+          usedPositions.push({ x, y });
+
+          key.style.left = x + "vw";
+          key.style.top = y + "vh";
+
+          key.onclick = () => {
+            if (i === correct) {
+              clearInterval(timerInterval);
+              timerBar.remove();
+              showOverlay("It worked!");
+            } else {
+              key.classList.add("shake");
+              setTimeout(() => key.classList.remove("shake"), 300);
+            }
+          };
+
+          game.appendChild(key);
+          objects.push(key);
+        }
+      }
+
+      /* LEVEL 4 – Boss */
+      function level5() {
+        speech.innerText = "Finish him!";
+
+        const hpBar = document.getElementById("boss-hp");
+        const hpFill = document.getElementById("boss-hp-fill");
+
+        let maxHP = 10;
+        let hp = maxHP;
+
+        hpBar.style.display = "block";
+        hpFill.style.width = "100%";
+
+        const boss = document.createElement("div");
+        boss.className = "enemy";
+        boss.style.background = "red";
+        boss.style.width = "80px";
+        boss.style.height = "80px";
+        boss.style.top = "40vh";
+        boss.style.left = "40vw";
+
+        boss.onclick = () => {
+          hp--;
+          hpFill.style.width = (hp / maxHP) * 100 + "%";
+
+          if (hp <= 0) {
+            boss.remove();
+            hpBar.style.display = "none";
+            showOverlay("You saved me ❤️");
+          }
+        };
+
+        game.appendChild(boss);
+        objects.push(boss);
+      }
+      /* END */
+      function endGame() {
+        speech.innerText = "I'm free!";
+        overlay.style.display = "flex";
+        overlayText.innerText =
+          "Happy Anniversary ❤️\nThank you for saving me!";
+        nextBtn.style.display = "none";
+      }
+    </script>
+  </body>
+</html>
