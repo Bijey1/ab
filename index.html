@@ -44,7 +44,7 @@
         right: 70px;
         width: 50px;
         height: 50px;
-        z-index: 1;
+        z-index: 2;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -56,7 +56,7 @@
         right: 70px;
         width: 50px;
         height: 50px;
-        z-index: 2;
+        z-index: 3;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -442,16 +442,74 @@
       /* animation triggered by adding class */
 
       .fall {
-        animation: fallDown 2s linear forwards;
+        animation: fallDown 1.5s linear forwards;
       }
 
       @keyframes fallDown {
         0% {
-          top: 50px;
+          top: 55px;
         }
         100% {
           top: 520px;
         }
+      }
+      /* END CREDITS */
+      #endCredits {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 245, 200, 0.95); /* soft yellow cinema vibe */
+        display: none;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 1.2s ease; /* smooth dim */
+      }
+
+      #endCredits.show {
+        opacity: 1;
+      }
+
+      .credits-content {
+        position: absolute;
+        bottom: 0; /* visible immediately */
+        width: 100%;
+        text-align: center;
+        font-family: serif;
+        color: #222;
+        animation: rollUp 18s linear forwards;
+      }
+
+      @keyframes rollUp {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(-160%);
+        }
+      }
+
+      /* FINAL LETTER */
+      #finalLetter {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 245, 200, 0.95);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 1.2s ease;
+        overflow-y: auto;
+        padding: 20px;
+      }
+
+      #finalLetter div {
+        max-width: 85%;
+        text-align: center;
+        font-family: serif;
+        color: #222;
       }
     </style>
   </head>
@@ -483,6 +541,29 @@
       <button id="next">Next</button>
     </div>
 
+    <!-- END CREDITS -->
+    <div id="endCredits">
+      <div class="credits-content">
+        <p>Directed By</p>
+        <h2>Me</h2>
+
+        <p>Story</p>
+        <h2>Me</h2>
+
+        <p>Programming</p>
+        <h2>Me</h2>
+
+        <h2>HAPPY ANNIVERSARY!!!</h2>
+
+        <p class="thanks">Thank you Bebi for playing. Sana po Nagusuhan mo</p>
+        <p class="thanks">I LOVE YOU</p>
+
+        <p style="margin-top: 50px; font-size: 14px">
+          Tap anywhere to continue
+        </p>
+      </div>
+    </div>
+
     <script>
       let wave = 1;
       let waveIntroShown = false;
@@ -492,10 +573,12 @@
       const nextBtn = document.getElementById("next");
       const speech = document.getElementById("speech");
       const player = document.querySelector(".player");
+      const playerImg = player.querySelector("img");
+
       const cage = document.getElementById("cage");
       const cageImg = document.querySelector("#cage img");
 
-      let level = 1;
+      let level = 3;
       let objects = [];
       let lost = false;
 
@@ -523,10 +606,20 @@
       const rivalBg = new Audio();
       const lostSfx = new Audio();
       const damage = new Audio();
+      const ending = new Audio();
+      const punch = new Audio();
+      const fly = new Audio();
+      const kiss = new Audio();
+      const metal = new Audio();
       rivalSpeech.src = "assets/rival.mp3";
       rivalBg.src = "assets/bone.mp3";
       lostSfx.src = "assets/lost.mp3";
       damage.src = "assets/damage.mp3";
+      ending.src = "assets/endingPixel.mp3";
+      punch.src = "assets/punch.mp3";
+      fly.src = "assets/fly.mp3";
+      metal.src = "assets/metalBreak.mp3";
+      kiss.src = "assets/kiss.mp3";
       nextBtn.onclick = () => {
         overlay.style.display = "none";
         waveIntroShown = false;
@@ -562,8 +655,8 @@
           console.log("nag run");
           level2();
         } else if (level === 3) {
-          level3();
-          //tempo();
+          //level3();
+          tempo();
         } else if (level === 4) level4();
         else endGame();
       }
@@ -1053,7 +1146,7 @@
         let maxHP = 60;
         let hp = maxHP;
 
-        //hp = 5;
+        hp = 5;
 
         // ====== BOSS ======
         const boss = document.createElement("div");
@@ -1198,6 +1291,7 @@
                             litus2.className = "enemy";
                             litus2.style.width = "60px";
                             litus2.style.height = "60px";
+                            litus2.style.zIndex = "1";
 
                             let y2 = 55; // up down
                             let x2 = -20; // vw
@@ -1257,9 +1351,11 @@
                                                     "assets/litusPunch.gif"; //Litus Walk
 
                                                   setTimeout(() => {
+                                                    punch.play();
                                                     boss.classList.add(
                                                       "kicked"
                                                     );
+                                                    fly.play();
 
                                                     // remove bossacter after animation
                                                     boss.addEventListener(
@@ -1287,26 +1383,32 @@
                                                               "auto";
                                                             cage.onclick =
                                                               () => {
+                                                                damage.play();
                                                                 clicks++;
                                                                 cage.classList.add(
                                                                   "shake"
                                                                 );
                                                                 setTimeout(
-                                                                  () =>
+                                                                  () => {
                                                                     cage.classList.remove(
                                                                       "shake"
-                                                                    ),
+                                                                    );
+                                                                    damage.pause();
+                                                                    damage.currentTime = 0;
+                                                                  },
+
                                                                   300
                                                                 );
 
                                                                 if (
-                                                                  clicks == 4
+                                                                  clicks == 2
                                                                 ) {
                                                                   cageImg.src =
                                                                     "assets/damagedCage.png";
                                                                 } else if (
-                                                                  clicks == 8
+                                                                  clicks == 4
                                                                 ) {
+                                                                  metal.play();
                                                                   speech.style.display =
                                                                     "none";
                                                                   cageImg.src =
@@ -1316,18 +1418,115 @@
                                                                   );
 
                                                                   setTimeout(
-                                                                    () =>
-                                                                      //Player fall from cage
-                                                                      1500
+                                                                    () => {
+                                                                      //Player fallen from cage
+                                                                      playerImg.src =
+                                                                        "assets/jumpingVj.gif";
+
+                                                                      setTimeout(
+                                                                        () => {
+                                                                          //After jumping animation
+                                                                          playerImg.src =
+                                                                            "assets/happyVj.png";
+                                                                          //Thank you for saving me
+                                                                          enemySpeechLikeSpeech(
+                                                                            player,
+                                                                            [
+                                                                              "Thank you For Saving me Mahal",
+                                                                            ],
+                                                                            () => {
+                                                                              playerImg.src =
+                                                                                "assets/sideWalkVj.gif"; //vj Walk
+
+                                                                              //After short speech lalapit ako
+                                                                              let xVj = 16; // starting from right: 70px
+                                                                              let speedVj = 0.2; // positive = move left
+                                                                              const walkIntervalVj =
+                                                                                setInterval(
+                                                                                  () => {
+                                                                                    xVj +=
+                                                                                      speedVj;
+                                                                                    player.style.right =
+                                                                                      xVj +
+                                                                                      "vw";
+
+                                                                                    if (
+                                                                                      xVj >=
+                                                                                      48
+                                                                                    ) {
+                                                                                      clearInterval(
+                                                                                        walkIntervalVj
+                                                                                      );
+                                                                                      playerImg.src =
+                                                                                        "assets/happyVj.png";
+                                                                                      setTimeout(
+                                                                                        () => {
+                                                                                          //Kiss
+                                                                                          setTimeout(
+                                                                                            () => {
+                                                                                              kiss.play();
+                                                                                            },
+                                                                                            1000
+                                                                                          );
+                                                                                          playerImg.src =
+                                                                                            "assets/kissVj.gif";
+                                                                                          setTimeout(
+                                                                                            () => {
+                                                                                              //finish Kissing
+                                                                                              playerImg.src =
+                                                                                                "assets/happyVj.png";
+                                                                                              enemySpeechLikeSpeech(
+                                                                                                player,
+                                                                                                [
+                                                                                                  "I LOVE YOU!!",
+                                                                                                  "Happy Anniversary, Bebi",
+                                                                                                  "Thank you for saving me kay Jong Harn",
+                                                                                                ],
+                                                                                                () => {
+                                                                                                  //End Credits final letter
+                                                                                                  ending.loop = true; // <-- makes it loop
+                                                                                                  ending.play();
+                                                                                                  setTimeout(
+                                                                                                    () => {
+                                                                                                      showEndCredits();
+                                                                                                    },
+                                                                                                    2000
+                                                                                                  );
+                                                                                                },
+                                                                                                -100,
+                                                                                                70,
+                                                                                                "no"
+                                                                                              );
+                                                                                            }, //end ng happyVj
+                                                                                            2600
+                                                                                          );
+                                                                                        },
+                                                                                        1000
+                                                                                      );
+                                                                                    }
+                                                                                  },
+                                                                                  20
+                                                                                );
+                                                                            },
+                                                                            -100, //x
+                                                                            70, //y
+                                                                            "no"
+                                                                          );
+                                                                        },
+                                                                        2300
+                                                                      );
+                                                                    },
+
+                                                                    2300 //Happy jumping Timer
                                                                   );
                                                                 }
                                                               };
                                                           }, 2000);
-                                                        }, 2000);
+                                                        }, 2000); //Change this to 2000 orginal
                                                       },
                                                       { once: true }
                                                     );
-                                                  }, 1450);
+                                                  }, 1500);
                                                 }
                                               },
                                               20
@@ -1550,6 +1749,68 @@
             update();
           }
         }, 30);
+      }
+      // === SHOW END CREDITS ===
+      function showEndCredits() {
+        const credits = document.getElementById("endCredits");
+        credits.style.display = "flex";
+
+        // force reflow so transition works
+        credits.offsetHeight;
+        credits.classList.add("show");
+
+        function finishCredits() {
+          credits.classList.remove("show");
+          setTimeout(() => {
+            credits.remove();
+            showFinalLetter(); // call final letter after credits
+          }, 800);
+
+          credits.removeEventListener("click", finishCredits);
+          credits.removeEventListener("touchstart", finishCredits);
+        }
+
+        // Tap anywhere to skip
+        credits.addEventListener("click", finishCredits);
+        credits.addEventListener("touchstart", finishCredits);
+      }
+
+      // === SHOW FINAL LETTER ===
+      function showFinalLetter() {
+        // Create container
+        const letter = document.createElement("div");
+        letter.id = "finalLetter";
+        letter.innerHTML = `
+    <div>
+      <h2>To My Love ❤️</h2>
+      <p>
+        Thank you for being my safe place, my strength, and my happiness.
+        Every moment with you feels like a victory. Thank you for choosing me up to this day.
+        Thank you for being my daily routine. Thank you for making me always feel safe. I'm very thankful for you po. I'm realy glad I met you bebi.
+      </p>
+
+      <p>
+I'm very thankful for you po. I'm realy glad I met you bebi. Thank you for being my comfort place. I miss every single moment na wala ka po here.
+I hope po na enjoy mo po ung gawa ko bebe kahit medjo fanghit, hehe. Super enjoy po ako gawin to po kasi na sasabotage ko si goofy ahh jonghan, hehe.
+I love you bebe. I'm here for you lang po, I'll be waiting you po hereee, but for the meantime, you enjoy po muna jaan sa america. 
+        </p>
+      <p>
+       Yun lang po bebe. Happy Anniversary po ulit satin. MWAMWAMWA 💋💋
+      </p>
+      <p><strong>Happy Anniversary ❤️</strong></p>
+      <p>— Litus</p>
+
+    </div>
+  `;
+
+        document.body.appendChild(letter);
+
+        // Fade in
+        requestAnimationFrame(() => {
+          letter.style.opacity = "1";
+        });
+
+        // Tap anywhere to remove letter
       }
     </script>
   </body>
