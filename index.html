@@ -578,7 +578,7 @@
       const cage = document.getElementById("cage");
       const cageImg = document.querySelector("#cage img");
 
-      let level = 3;
+      let level = 1;
       let objects = [];
       let lost = false;
 
@@ -655,8 +655,8 @@
           console.log("nag run");
           level2();
         } else if (level === 3) {
-          //level3();
-          tempo();
+          level3();
+          // tempo();
         } else if (level === 4) level4();
         else endGame();
       }
@@ -1355,7 +1355,7 @@
                                                     boss.classList.add(
                                                       "kicked"
                                                     );
-                                                    fly.play();
+                                                    //fly.play();
 
                                                     // remove bossacter after animation
                                                     boss.addEventListener(
