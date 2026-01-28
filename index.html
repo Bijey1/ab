@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -33,10 +33,27 @@
 
       /* GAME */
       #game {
+        position: relative;
         width: 100vw;
         height: 100vh;
-        position: relative;
+        overflow: hidden;
       }
+
+      /* Background image */
+      #game-bg {
+        position: absolute;
+        inset: 0;
+
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* pixel safe */
+        image-rendering: pixelated;
+
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* Everything else goes above the background */
 
       /* PLAYER */
       .player {
@@ -557,13 +574,14 @@
   </head>
 
   <body>
-    <!-- INTRO CUTSCENE -->
+    <!-- INTRO CUTSCENE   -->
     <div id="intro">
       <img id="cutS" src="assets/intro1.png" alt="Boss kidnaps me" />
     </div>
 
     <!-- GAME -->
     <div id="game">
+      <img id="game-bg" src="assets/mainBg.png" />
       <div id="boss-hp">
         <div id="boss-hp-fill"></div>
       </div>
@@ -586,15 +604,6 @@
     <!-- END CREDITS -->
     <div id="endCredits">
       <div class="credits-content">
-        <p>Directed By</p>
-        <h2>Me</h2>
-
-        <p>Story</p>
-        <h2>Me</h2>
-
-        <p>Programming</p>
-        <h2>Me</h2>
-
         <h2>HAPPY ANNIVERSARY!!!</h2>
 
         <p class="thanks">Thank you Bebi for playing. Sana po Nagusuhan mo</p>
@@ -629,7 +638,7 @@
 
       // At the start of your script, before any scenes play
       const preloadedGifs = {};
-      //startLevel();
+      // startLevel();
 
       function preloadGifs(sources) {
         return Promise.all(
@@ -642,7 +651,7 @@
               };
               img.src = src;
             });
-          })
+          }),
         );
       }
 
@@ -784,13 +793,13 @@
                                   },
                                   "left",
                                   "20%", //x
-                                  "40%" //y
+                                  "40%", //y
                                 );
                               }, 4000);
                             },
                             "right",
                             "70%", //x
-                            "40%" //y
+                            "40%", //y
                           ); //end dialog 4th, NAKIDNAP NA
                         }, 8000);
 
@@ -798,19 +807,19 @@
                       },
                       "right",
                       "70%", //x
-                      "40%" //y
+                      "40%", //y
                     ); //end dialog 3rd
                   }, 7000);
                 },
                 "right",
                 "43%", //x
-                "42%" //y
+                "42%", //y
               ); //end dialog 2nd
             }, 6500);
           }, //first scene
           "right",
           "60%", //x
-          "42%" //y
+          "42%", //y
         );
       }
 
@@ -822,7 +831,7 @@
         dir,
         x = "50%",
         y = "75%",
-        anchor = "center"
+        anchor = "center",
       ) {
         let index = 0;
 
@@ -897,6 +906,7 @@
       fly.src = "assets/fly.mp3";
       metal.src = "assets/metalBreak.mp3";
       kiss.src = "assets/kiss.mp3";
+
       nextBtn.onclick = () => {
         overlay.style.display = "none";
         waveIntroShown = false;
@@ -906,6 +916,9 @@
             level = 4;
 
             startLevel();
+          } else if (level == 3) {
+            level = 3;
+            lost = false;
           } else {
             level = 1;
             wave = 1;
@@ -964,20 +977,27 @@
           setTimeout(() => {
             screen.remove();
             callback(); // start next wave AFTER transition
-          }, 300);
-        }, 1900);
+          }, 600);
+        }, 2200);
       }
 
       /* LEVEL 1 – Tap Enemies */
       function level1(enemyCnt) {
-        speech.innerText = "Tap them before they reach the bottom!";
-
+        speech.innerText = "Tap them before they reach the bottom bebe!";
+        speech.style.background = "white";
         if (!waveIntroShown) {
           waveIntroShown = true;
-
-          showWaveScreen("WAVE", wave, () => {
-            level1(enemyCnt); // restart level after intro
-          });
+          if (wave == 1) {
+            showWaveScreen("Tap The Goblins to Slay Them", "", () => {
+              showWaveScreen("WAVE", wave, () => {
+                level1(enemyCnt); // restart level after intro
+              });
+            });
+          } else {
+            showWaveScreen("WAVE", wave, () => {
+              level1(enemyCnt); // restart level after intro
+            });
+          }
 
           return; // stop execution for now
         }
@@ -1108,7 +1128,10 @@
 
       /* LEVEL 2 – Tap Barrier */
       function level2() {
-        speech.innerText = "I think the password is the date we first met";
+        setTimeout(() => {
+          speech.innerText = "I think the password is the date we first met";
+          speech.style.background = "white";
+        }, 20000);
 
         if (!waveIntroShown) {
           waveIntroShown = true;
@@ -1220,7 +1243,7 @@
                 overlay.style.display = "none";
                 keypadBtn.remove();
                 doorImg.src = "assets/door.png";
-                speech.innerText = "You remembered… 💖 Break the door!";
+                speech.innerText = "You remembered…  Break the door!";
               } else {
                 panel.classList.add("shake");
                 setTimeout(() => panel.classList.remove("shake"), 300);
@@ -1266,6 +1289,7 @@
 
       function level3() {
         speech.innerText = "Find the Correct Key, Bebe!";
+        speech.style.background = "white";
         if (!waveIntroShown) {
           waveIntroShown = true;
 
@@ -1311,7 +1335,8 @@
           if (timeLeft <= 0) {
             clearInterval(timerInterval);
             timerBar.remove();
-            showOverlay("Time's up! ⏰");
+            lost = true;
+            showOverlay("Time's up! You lost Bebi. :(");
             objects.forEach((o) => o.remove());
             objects = [];
           }
@@ -1391,7 +1416,8 @@
         let gameOver4 = false;
 
         lost = false;
-        speech.innerText = "Finish him!";
+        speech.innerText = "You're here bebe!";
+        speech.style.background = "white";
         player.style.top = "100px";
 
         const hpBar = document.getElementById("boss-hp");
@@ -1464,6 +1490,9 @@
                 "So.. you finally arrived",
                 "Time to face your fate",
                 "Let's see how strong you really are",
+                "사랑해 ",
+                "책 ",
+                "예쁘다",
               ],
               () => {
                 rivalSpeech.pause();
@@ -1523,7 +1552,7 @@
                           document.removeEventListener("click", clickListener);
                           document.removeEventListener(
                             "touchstart",
-                            touchListener
+                            touchListener,
                           );
                         }
 
@@ -1607,6 +1636,7 @@
                                       boss,
                                       [
                                         "Agay! Yawa!",
+                                        "SHIBAL",
                                         "Sorry na, Sayo na tong bebe mo",
                                         "Auko na Pls",
                                         "Pazinsya na",
@@ -1631,7 +1661,7 @@
                                                   setTimeout(() => {
                                                     punch.play();
                                                     boss.classList.add(
-                                                      "kicked"
+                                                      "kicked",
                                                     );
                                                     //fly.play();
 
@@ -1646,6 +1676,8 @@
                                                         //Speech sa cage
                                                         speech.style.display =
                                                           "block";
+                                                        speech.style.background =
+                                                          "white";
                                                         speech.innerText =
                                                           "YEHEY!!";
                                                         setTimeout(() => {
@@ -1664,18 +1696,18 @@
                                                                 damage.play();
                                                                 clicks++;
                                                                 cage.classList.add(
-                                                                  "shake"
+                                                                  "shake",
                                                                 );
                                                                 setTimeout(
                                                                   () => {
                                                                     cage.classList.remove(
-                                                                      "shake"
+                                                                      "shake",
                                                                     );
                                                                     damage.pause();
                                                                     damage.currentTime = 0;
                                                                   },
 
-                                                                  300
+                                                                  300,
                                                                 );
 
                                                                 if (
@@ -1692,7 +1724,7 @@
                                                                   cageImg.src =
                                                                     "assets/destroyedCage.png";
                                                                   player.classList.add(
-                                                                    "fall"
+                                                                    "fall",
                                                                   );
 
                                                                   setTimeout(
@@ -1732,7 +1764,7 @@
                                                                                       48
                                                                                     ) {
                                                                                       clearInterval(
-                                                                                        walkIntervalVj
+                                                                                        walkIntervalVj,
                                                                                       );
                                                                                       playerImg.src =
                                                                                         "assets/happyVj.png";
@@ -1743,7 +1775,7 @@
                                                                                             () => {
                                                                                               kiss.play();
                                                                                             },
-                                                                                            1000
+                                                                                            1000,
                                                                                           );
                                                                                           playerImg.src =
                                                                                             "assets/kissVj.gif";
@@ -1767,57 +1799,57 @@
                                                                                                     () => {
                                                                                                       showEndCredits();
                                                                                                     },
-                                                                                                    2000
+                                                                                                    2000,
                                                                                                   );
                                                                                                 },
                                                                                                 -100,
                                                                                                 70,
-                                                                                                "no"
+                                                                                                "no",
                                                                                               );
                                                                                             }, //end ng happyVj
-                                                                                            2600
+                                                                                            2600,
                                                                                           );
                                                                                         },
-                                                                                        1000
+                                                                                        1000,
                                                                                       );
                                                                                     }
                                                                                   },
-                                                                                  20
+                                                                                  20,
                                                                                 );
                                                                             },
                                                                             -100, //x
                                                                             70, //y
-                                                                            "no"
+                                                                            "no",
                                                                           );
                                                                         },
-                                                                        2300
+                                                                        2300,
                                                                       );
                                                                     },
 
-                                                                    2300 //Happy jumping Timer
+                                                                    2300, //Happy jumping Timer
                                                                   );
                                                                 }
                                                               };
                                                           }, 2000);
                                                         }, 2000); //Change this to 2000 orginal
                                                       },
-                                                      { once: true }
+                                                      { once: true },
                                                     );
                                                   }, 1500);
                                                 }
                                               },
-                                              20
+                                              20,
                                             );
                                           },
 
                                           -300, //x
                                           90, //y
-                                          "no"
+                                          "no",
                                         );
                                       },
                                       -220, //x
                                       90, //y
-                                      "no"
+                                      "no",
                                     );
                                   }
                                 }, 20);
@@ -1912,17 +1944,21 @@
                       },
                       50,
                       -100,
-                      "big"
+                      "big",
                     );
                   });
                 }, 6900); // Last speech before final battle
               },
               -220,
               70,
-              "no"
+              "no",
             );
 
-            speech.innerText = "It's here!";
+            speech.innerText = "He's here!, Please Free me kay JonhHan Bebi";
+            setTimeout(() => {
+              speech.innerText = "";
+              speech.style.background = "none";
+            }, 3000);
           }
         }, 20);
       }
@@ -1932,7 +1968,7 @@
         playerName,
         bossImgSrc,
         bossName,
-        onFinish
+        onFinish,
       ) {
         const vs = document.createElement("div");
         vs.className = "vs-card";
@@ -1979,7 +2015,7 @@
         onFinish,
         offsetX = 0,
         offsetY = 0,
-        big
+        big,
       ) {
         let index = 0;
 
