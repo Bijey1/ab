@@ -617,7 +617,7 @@
   </head>
 
   <body>
-    <!-- INTRO CUTSCENE  -->
+    <!-- INTRO CUTSCENE 
     <div id="tapToStart">
       <div class="tap-text">Tap anywhere Bebi</div>
     </div>
@@ -625,7 +625,7 @@
     <div id="intro">
       <img id="cutS" src="assets/intro1.png" alt="Boss kidnaps me" />
     </div>
-
+ -->
     <!-- GAME -->
     <div id="game">
       <img id="game-bg" src="assets/mainBg.png" />
@@ -745,8 +745,8 @@
       ]).then(() => {
         // Start your scenes after everything is loaded
 
-        startIntroSequence();
-        //startLevel();
+        //startIntroSequence();
+        startLevel();
       });
 
       function fadeIn(duration = 1000) {
@@ -1216,6 +1216,7 @@
           // Tap to destroy
           e.onclick = () => {
             clearInterval(moveInterval);
+            e.remove();
 
             objects = objects.filter((o) => o !== e);
 
@@ -1983,7 +1984,7 @@
 
                         // ====== Minion spawner ======
                         const loseLine = 95; // vh
-                        const minionSpeed = 0.4;
+                        const minionSpeed = 0.3;
                         // const minionSpeed = 0.1;
 
                         // boss horizontal safe zone
