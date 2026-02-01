@@ -617,7 +617,7 @@
   </head>
 
   <body>
-    <!-- INTRO CUTSCENE 
+    <!-- INTRO CUTSCENE  -->
     <div id="tapToStart">
       <div class="tap-text">Tap anywhere Bebi</div>
     </div>
@@ -625,7 +625,7 @@
     <div id="intro">
       <img id="cutS" src="assets/intro1.png" alt="Boss kidnaps me" />
     </div>
- -->
+
     <!-- GAME -->
     <div id="game">
       <img id="game-bg" src="assets/mainBg.png" />
@@ -745,8 +745,8 @@
       ]).then(() => {
         // Start your scenes after everything is loaded
 
-        //startIntroSequence();
-        startLevel();
+        startIntroSequence();
+        //startLevel();
       });
 
       function fadeIn(duration = 1000) {
@@ -1420,7 +1420,7 @@
         const correct = Math.floor(Math.random() * keyCount);
 
         // TIMER BAR SETTINGS
-        let timeLeft = 20; // seconds
+        let timeLeft = 25; // seconds
         const timerBar = document.createElement("div");
         timerBar.id = "level3-timer-bar";
         timerBar.style.position = "absolute";
@@ -1563,9 +1563,9 @@
         game.appendChild(litus);
         objects.push(litus);
 
-        const speed = 0.1; // moving speed
+        const speed = 0.2; // moving speed
 
-        let maxHP = 30;
+        let maxHP = 20;
         let hp = maxHP;
 
         //hp = 5;
@@ -1984,7 +1984,7 @@
 
                         // ====== Minion spawner ======
                         const loseLine = 95; // vh
-                        const minionSpeed = 0.3;
+                        const minionSpeed = 0.2;
                         // const minionSpeed = 0.1;
 
                         // boss horizontal safe zone
@@ -2058,7 +2058,7 @@
                             minion.remove();
                             objects = objects.filter((o) => o !== minion);
                           };
-                        }, 1200); // spawn every 3 sec
+                        }, 2000); // spawn every 3 sec
                       },
                       50,
                       -100,
